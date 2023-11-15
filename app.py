@@ -3,10 +3,11 @@ from fastapi.security import APIKeyHeader, APIKeyQuery
 from typing import Union
 from tui_module import TUI
 from tnrib_module import TNRIB
+import requests
 
 
 api_keys = [
-    "my_api_key"
+    "WzIsImhhbWVkIEhhd2FyaSJd"
 ]
 
 api_key_header = APIKeyHeader(name="x-api-key", auto_error=False)
@@ -28,10 +29,14 @@ async def root():
     return {"message": "Hello World"}
     
 @app.get("/tui")
-def is_valid(api_key: str = Security(get_api_key), s: Union[str, None] = None):
+async def is_valid(api_key: str = Security(get_api_key), s: Union[str, None] = None):
     if s:
         t = TUI(s)
-        return {"result": t.is_valid()}
+        if t.is_valid():
+            response = requests.get('https://www.registre-entreprises.tn/rne-api/public/registres/pm?idUnique=' + s)
+            return {"result": response.json(), "status": response.status_code}
+        else:
+            return {"result": "VAT is not valid"}
     return {"result": "VAT is not provided"}
     
 @app.get("/tnrib")
@@ -44,6 +49,13 @@ def is_valid(api_key: str = Security(get_api_key), s: Union[str, None] = None):
             return {"result": "BBAN is not valid"}
     return {"result": "BBAN is not provided"}
     
+@app.get("/rne")
+async def is_valid(api_key: str = Security(get_api_key), s: Union[str, None] = None):
+    if s:
+        response = requests.get('https://www.registre-entreprises.tn/rne-api/public/registres/pm/' + s)
+        return {"result": response.json(), "status": response.status_code}
+    return {"result": "RNE is not provided"}
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
