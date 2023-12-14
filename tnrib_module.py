@@ -23,7 +23,8 @@ class TNRIB:
         {'code': '28', 'name': 'ABC', 'bic': 'ABCO'},
         {'code': '29', 'name': 'BFPME', 'bic': 'BFPM'},
         {'code': '32', 'name': 'ALBARAKA', 'bic': 'BEIT'},
-        {'code': '47', 'name': 'WIFAK', 'bic': 'WKIB'}
+        {'code': '47', 'name': 'WIFAK', 'bic': 'WKIB'},
+        {'code': '81', 'name': 'ZITOUNAPAY', 'bic': 'ETZP' }
     ]
 
     def __init__(self, value):
