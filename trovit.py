@@ -2,6 +2,7 @@ import random
 import requests
 import time
 import json
+from datetime import datetime
 
 class TUI:
     alphabet = "ABCDEFGHJKLMNPQRSTVWXYZ"
@@ -44,10 +45,16 @@ def check_validity(company_numbers):
     return valid_numbers
 
 # Generate 100 company numbers starting with "17"
-company_numbers = generate_company_numbers(17, 100)
+company_numbers = generate_company_numbers(16, 100)
 
 # Check the validity of each company number and keep only valid ones
 valid_numbers = check_validity(company_numbers)
+
+# Generate a timestamp for the filename
+timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+
+# Construct the filename with the timestamp
+json_filename = f'valid_numbers_{timestamp}.json'
 
 # Print the valid company numbers
 print("Valid Company Numbers:")
@@ -55,16 +62,5 @@ for number in valid_numbers:
     print(number)
 
 # Save the valid company numbers to a JSON file
-with open('valid_numbers.json', 'w') as json_file:
+with open(json_filename, 'w') as json_file:
     json.dump(valid_numbers, json_file)
-
-    
-    
-    
-
-
-
-
-
-
-
