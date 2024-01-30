@@ -45,7 +45,7 @@ def check_validity(company_numbers):
     return valid_numbers
 
 # Generate 100 company numbers starting with "17"
-company_numbers = generate_company_numbers(16, 100)
+company_numbers = generate_company_numbers(12, 100)
 
 # Check the validity of each company number and keep only valid ones
 valid_numbers = check_validity(company_numbers)
