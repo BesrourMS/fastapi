@@ -64,3 +64,4 @@ for number in valid_numbers:
 # Save the valid company numbers to a JSON file
 with open(json_filename, 'w') as json_file:
     json.dump(valid_numbers, json_file)
+
