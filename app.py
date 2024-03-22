@@ -33,8 +33,12 @@ async def is_valid(api_key: str = Security(get_api_key), s: Union[str, None] = N
     if s:
         t = TUI(s)
         if t.is_valid():
-            response = requests.get('https://www.registre-entreprises.tn/rne-api/public/registres/pm?idUnique=' + s)
-            return {"result": response.json(), "status": response.status_code}
+            try:
+                response = requests.get('https://www.registre-entreprises.tn/rne-api/public/registres/pm?idUnique=' + s)
+                response.raise_for_status()  # Raise exception for 4XX or 5XX status codes
+                return {"result": response.json(), "status": response.status_code}
+            except requests.exceptions.HTTPError as e:
+                return {"result": "Company does not exist in the database."}
         else:
             return {"result": "VAT is not valid"}
     return {"result": "VAT is not provided"}
@@ -52,8 +56,12 @@ def is_valid(api_key: str = Security(get_api_key), s: Union[str, None] = None):
 @app.get("/rne")
 async def is_valid(api_key: str = Security(get_api_key), s: Union[str, None] = None):
     if s:
-        response = requests.get('https://www.registre-entreprises.tn/rne-api/public/registres/pm/' + s)
-        return {"result": response.json(), "status": response.status_code}
+        try:
+            response = requests.get('https://www.registre-entreprises.tn/rne-api/public/registres/pm/' + s)
+            response.raise_for_status()  # Raise exception for 4XX or 5XX status codes
+            return {"result": response.json(), "status": response.status_code}
+        except requests.exceptions.HTTPError as e:
+            return {"result": "Company does not exist in the database."}
     return {"result": "RNE is not provided"}
 
 if __name__ == "__main__":
