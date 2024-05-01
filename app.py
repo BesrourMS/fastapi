@@ -7,12 +7,16 @@ from tnrib_module import TNRIB
 import requests
 import json
 import httpx
+import re
 
 api_keys = [
     "WzIsImhhbWVkIEhhd2FyaSJd"
 ]
 
 api_key_header = APIKeyHeader(name="x-api-key", auto_error=False)
+
+# Regular expression for domain validation
+domain_regex = r'^[a-zA-Z0-9-]{2,25}\.[a-zA-Z0-9-.]+$'
 
 def get_api_key(
         api_key_header: str = Security(api_key_header),
@@ -68,6 +72,10 @@ async def is_valid(api_key: str = Security(get_api_key), s: Union[str, None] = N
 
 @app.post("/whois/")
 async def whois(domain: str = Form(...)):
+    # Check if the provided domain string matches the expected format
+    if not re.match(domain_regex, domain):
+        return {"error": "Invalid domain format. Please provide a domain name with at least 2 characters and not exceeding 25 characters."}
+    
     url = "https://whois.ati.tn/"
 
     payload = f"domain={domain}&ext=1&submit=ok&b_existe=Existe%3F"
