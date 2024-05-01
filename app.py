@@ -1,10 +1,12 @@
-from fastapi import HTTPException, status, Security, FastAPI
+from fastapi import HTTPException, status, Security, FastAPI, Form
+from bs4 import BeautifulSoup
 from fastapi.security import APIKeyHeader, APIKeyQuery
 from typing import Union
 from tui_module import TUI
 from tnrib_module import TNRIB
 import requests
-
+import json
+import httpx
 
 api_keys = [
     "WzIsImhhbWVkIEhhd2FyaSJd"
