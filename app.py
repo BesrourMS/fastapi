@@ -70,6 +70,27 @@ async def is_valid(api_key: str = Security(get_api_key), s: Union[str, None] = N
             return {"result": "Company does not exist in the database."}
     return {"result": "RNE is not provided"}
 
+@app.get("/aps")
+async def is_valid(api_key: APIKey = Security(get_api_key), s: Union[str, None] = None):
+    if s:
+        t = TUI(s)
+        if t.is_valid():
+            try:
+                response = requests.get('https://api-tej.finances.gov.tn/v0/tax_file/infos?identify=' + s)
+                if response.status_code == 200:
+                    data = response.json()
+                    if data and data.get("code") == 0 and data.get("dossier"):
+                        return {"result": data, "status": response.status_code}
+                    else:
+                        return {"result": "No records found for the provided ID"}
+                else:
+                    return {"result": "Failed to fetch data"}
+            except requests.RequestException as e:
+                return {"result": f"An error occurred: {e}"}
+        else:
+            return {"result": "VAT is not valid"}
+    return {"result": "VAT is not provided"}
+
 @app.post("/whois/")
 async def whois(domain: str = Form(...)):
     # Check if the provided domain string matches the expected format
