@@ -71,7 +71,7 @@ async def is_valid(api_key: str = Security(get_api_key), s: Union[str, None] = N
     return {"result": "RNE is not provided"}
 
 @app.get("/aps")
-async def is_valid(api_key: APIKey = Security(get_api_key), s: Union[str, None] = None):
+async def is_valid(api_key: str = Security(get_api_key), s: Union[str, None] = None):
     if s:
         t = TUI(s)
         if t.is_valid():
