@@ -40,7 +40,7 @@ async def is_valid(api_key: str = Security(get_api_key), s: Union[str, None] = N
         t = TUI(s)
         if t.is_valid():
             try:
-                response = requests.get('https://www.registre-entreprises.tn/rne-api/public/registres/pm?idUnique=' + s)
+                response = requests.get('https://www.registre-entreprises.tn/api/rne-api/front-office/shortEntites?idUnique=' + s)
                 response.raise_for_status()  # Raise exception for 4XX or 5XX status codes
                 return {"result": response.json(), "status": response.status_code}
             except requests.exceptions.HTTPError as e:
@@ -63,7 +63,7 @@ def is_valid(api_key: str = Security(get_api_key), s: Union[str, None] = None):
 async def is_valid(api_key: str = Security(get_api_key), s: Union[str, None] = None):
     if s:
         try:
-            response = requests.get('https://www.registre-entreprises.tn/rne-api/public/registres/pm/' + s)
+            response = requests.get('https://www.registre-entreprises.tn/api/rne-api/front-office/entites/short-details/' + s)
             response.raise_for_status()  # Raise exception for 4XX or 5XX status codes
             return {"result": response.json(), "status": response.status_code}
         except requests.exceptions.HTTPError as e:
