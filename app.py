@@ -63,11 +63,33 @@ def is_valid(api_key: str = Security(get_api_key), s: Union[str, None] = None):
 async def is_valid(api_key: str = Security(get_api_key), s: Union[str, None] = None):
     if s:
         try:
-            response = requests.get('https://www.registre-entreprises.tn/api/rne-api/front-office/entites/short-details/' + s)
-            response.raise_for_status()  # Raise exception for 4XX or 5XX status codes
-            return {"result": response.json(), "status": response.status_code}
-        except requests.exceptions.HTTPError as e:
-            return {"result": "Company does not exist in the database."}
+            headers = {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/155.0.0.0 Safari/537.36"
+            }
+
+            response = requests.get(
+                f"https://www.registre-entreprises.tn/api/rne-api/front-office/entites/short-details/{s}",
+                headers=headers,
+                timeout=15
+            )
+
+            response.raise_for_status()
+
+            return {
+                "result": response.json(),
+                "status": response.status_code
+            }
+
+        except requests.exceptions.HTTPError:
+            return {
+                "result": "Company does not exist in the database."
+            }
+
+        except requests.exceptions.RequestException as e:
+            return {
+                "result": f"Request failed: {str(e)}"
+            }
+
     return {"result": "RNE is not provided"}
 
 @app.get("/aps")
