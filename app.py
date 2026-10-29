@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 from fastapi.security import APIKeyHeader, APIKeyQuery
 from typing import Union
 from urllib.parse import urlencode
-from scrapling.fetchers import StealthyFetcher
+from scrapling.fetchers import Fetcher
 from tui_module import TUI
 from tnrib_module import TNRIB
 import requests
@@ -193,11 +193,10 @@ async def is_valid(
     )
 
     try:
-        response = await StealthyFetcher.async_fetch(
+        response = Fetcher.get(
             url,
-            timeout=8000,
-            extra_headers={"Accept": "application/json"},
-            disable_resources=True,
+            headers={"Accept": "application/json"},
+            timeout=5,
         )
 
         if response.status == 200:
