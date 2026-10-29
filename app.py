@@ -2,6 +2,8 @@ from fastapi import HTTPException, status, Security, FastAPI, Form
 from bs4 import BeautifulSoup
 from fastapi.security import APIKeyHeader, APIKeyQuery
 from typing import Union
+from urllib.parse import urlencode
+from scrapling.fetchers import StealthyFetcher
 from tui_module import TUI
 from tnrib_module import TNRIB
 import requests
@@ -173,7 +175,44 @@ async def is_valid(
     except ValueError:
         return {"result": "Invalid response from the tax API"}
 
+@app.get("/v3/aps")
+async def is_valid(
+    api_key: str = Security(get_api_key),
+    s: Union[str, None] = None,
+):
+    if not s:
+        return {"result": "VAT is not provided"}
 
+    t = TUI(s)
+    if not t.is_valid():
+        return {"result": "VAT is not valid"}
+
+    url = (
+        "https://api-tej.finances.gov.tn/v0/tax_file/infos?"
+        + urlencode({"identify": s})
+    )
+
+    try:
+        response = await StealthyFetcher.async_fetch(
+            url,
+            timeout=8000,
+            extra_headers={"Accept": "application/json"},
+            disable_resources=True,
+        )
+
+        if response.status == 200:
+            data = response.json()
+
+            if data and data.get("code") == 0 and data.get("dossier"):
+                return {"result": data, "status": response.status}
+
+            return {"result": "No records found for the provided ID"}
+
+        return {"result": "Failed to fetch data", "status": response.status}
+
+    except Exception as e:
+        return {"result": f"An error occurred: {str(e)}"}
+        
 @app.post("/whois/")
 async def whois(domain: str = Form(...)):
     # Check if the provided domain string matches the expected format
