@@ -2,8 +2,6 @@ from fastapi import HTTPException, status, Security, FastAPI, Form
 from bs4 import BeautifulSoup
 from fastapi.security import APIKeyHeader, APIKeyQuery
 from typing import Union
-from urllib.parse import urlencode
-from scrapling.fetchers import Fetcher
 from tui_module import TUI
 from tnrib_module import TNRIB
 import requests
@@ -120,100 +118,6 @@ async def is_valid(api_key: str = Security(get_api_key), s: Union[str, None] = N
         else:
             return {"result": "VAT is not valid"}
     return {"result": "VAT is not provided"}
-
-@app.get("/v2/aps")
-async def is_valid(
-    api_key: str = Security(get_api_key),
-    s: Union[str, None] = None,
-):
-    if not s:
-        return {"result": "VAT is not provided"}
-
-    t = TUI(s)
-    if not t.is_valid():
-        return {"result": "VAT is not valid"}
-
-    url = "https://api-tej.finances.gov.tn/v0/tax_file/infos"
-
-    try:
-        timeout = httpx.Timeout(
-            connect=2.0,
-            read=5.0,
-            write=2.0,
-            pool=1.0,
-        )
-
-        async with httpx.AsyncClient(timeout=timeout) as client:
-            response = await client.get(
-                url,
-                params={"identify": s},
-            )
-
-        if response.status_code != 200:
-            return {"result": "Failed to fetch data"}
-
-        data = response.json()
-
-        if (
-            data
-            and data.get("code") == 0
-            and data.get("dossier")
-        ):
-            return {
-                "result": data,
-                "status": response.status_code,
-            }
-
-        return {"result": "No records found for the provided ID"}
-
-    except httpx.TimeoutException:
-        return {"result": "Tax API request timed out"}
-
-    except httpx.RequestError:
-        return {"result": "Unable to connect to the tax API"}
-
-    except ValueError:
-        return {"result": "Invalid response from the tax API"}
-
-@app.get("/v3/aps")
-async def is_valid(
-    api_key: str = Security(get_api_key),
-    s: Union[str, None] = None,
-):
-    if not s:
-        return {"result": "VAT is not provided"}
-
-    t = TUI(s)
-    if not t.is_valid():
-        return {"result": "VAT is not valid"}
-
-    url = (
-        "https://api-tej.finances.gov.tn/v0/tax_file/infos?"
-        + urlencode({"identify": s})
-    )
-
-    try:
-        response = Fetcher.get(
-            url,
-            headers={
-                "Accept": "application/json",
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
-            },
-            timeout=5,
-        )
-        
-        if response.status == 200:
-            data = response.json()
-
-            if data and data.get("code") == 0 and data.get("dossier"):
-                return {"result": data, "status": response.status}
-
-            return {"result": "No records found for the provided ID"}
-
-        return {"result": "Failed to fetch data", "status": response.status}
-
-    except Exception as e:
-        return {"result": f"An error occurred: {str(e)}"}
         
 @app.post("/whois/")
 async def whois(domain: str = Form(...)):
