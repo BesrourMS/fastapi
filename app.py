@@ -98,7 +98,13 @@ async def is_valid(api_key: str = Security(get_api_key), s: Union[str, None] = N
         t = TUI(s)
         if t.is_valid():
             try:
-                response = requests.get('https://api-tej.finances.gov.tn/v0/tax_file/infos?identify=' + s, verify=False)
+                response = requests.get(
+                    'https://api-tej.finances.gov.tn/v0/tax_file/infos?identify=' + s,
+                    headers={
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36'
+                    },
+                    verify=False
+                )
                 if response.status_code == 200:
                     data = response.json()
                     if data and data.get("code") == 0 and data.get("dossier"):
